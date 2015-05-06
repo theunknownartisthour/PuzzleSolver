@@ -166,6 +166,13 @@ public:
 		return 0;
 	}
 
+	int getXfromIndex(int i){
+		return i % width;
+	}
+
+	int getYfromIndex(int i){
+		return i / width;
+	}
 
 	int pushPiece(Piece a){
 		/*Is the board clear at this point?*/
@@ -200,8 +207,24 @@ public:
 		displayIndex();
 		return 1;
 	}
+	int countPieces(){
+		return pieces.size();
+	}
 	void popPiece(){
+		int lastIndex = placements.back();
+		int delx = getXfromIndex(lastIndex);
+		int dely = getYfromIndex(lastIndex);
+		Piece lastPiece = pieces.back();
+		int w = lastPiece.getWidth();
+		int h = lastPiece.getHeight();
+		for(int x=0; x<w; x++){
+			for(int y=0; y<h; y++){
+				/*Remove the piece from the game board*/
+				gameBoard[x+delx][y+dely] = 0;
+			}
+		}
 		pieces.pop_back();
+		placements.pop_back();
 	}
 	void swap(int index, int index2){
 		Piece temp = pieces[index];
@@ -249,6 +272,12 @@ public:
 	}
 	void displayIndex(){
 		cout << "[" << coordx << "][" << coordy << "]" << endl;
+	}
+	void displayPlacements(){
+		int size = placements.size();
+		for(int i=0; i<size; i++){
+			cout << "[" << placements[i] << "]<" << pieces[i].getCode() << ">" << endl; 
+		}
 	}
 };
 
@@ -299,5 +328,12 @@ int main(void)
 
 	cout << "Pushing D: " << testBoard.pushPiece(D) << endl;
 	testBoard.display();
+	testBoard.displayPlacements();
+
+	while(testBoard.countPieces() > 0){
+		cout << "Removing Last Piece" << endl;
+		testBoard.popPiece();
+		testBoard.display();
+	}
 	system("pause");
 }

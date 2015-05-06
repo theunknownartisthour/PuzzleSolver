@@ -14,12 +14,31 @@ unsigned int msb32(unsigned long x)
 	unsigned long index;
 	return _BitScanReverse(&index, x) + 1;
 }
-
-class FinancialAid{
+/*Abstract directions as a series of choices on what? Our Block*/
+class Choice{
 private:
-
+	int what;
+	int selection;
 public:
+	Choice(int w,int s){
+		what = w;
+		selection = s;
+	}
+};
 
+class Path{
+private:
+	vector<Choice> Selections;
+public:
+	Path(){
+		Selections.clear();
+	}
+	void makeChoice(Choice a){
+		Selections.push_back(a);
+	}
+	void undoChoice(){
+		Selections.pop_back();
+	}
 };
 
 class State{
@@ -103,49 +122,182 @@ public:
 	}
 };
 
+vector<State> boardOverTime;
+vector<Path> choicesOverTime;
+
 class Board: public Piece{
 private:
-	vector<Piece> Pieces;
-	vector<int> EffectiveIndex;
+	vector<Piece> pieces;
+	vector<int> placements;
+	vector<Path> choices;
+	vector< vector<int> > gameBoard;
+	int index;
+	int coordx;
+	int coordy;
 public:
-	Board(){
-		Pieces.clear();
-		EffectiveIndex.clear();
-		EffectiveIndex.push_back(0);
+	Board(int w=4,int h=4){
+		moveIndex(0);
+		pieces = vector<Piece>(0);/*w*h);*/
+		width = w;
+		height = h;
+		placements = vector<int>(0);/*vector<int>(w*h,0);*/
+		gameBoard = vector< vector<int> >(w,h);
+		vector<int> blank(w,0);
+		fill( gameBoard.begin() , gameBoard.end() , blank );
+	}
+
+	int moveIndex(int i){
+		if(i < width*height){
+			index = i;
+			coordy = index / width;
+			coordx = index % width;
+			return 1;
+		}
+		return 0;
+	}
+
+	int moveIndex(int x,int y){
+		if(x < width && y < height) {
+			coordx = x;
+			coordy = y;
+			index = y*width + x;
+			return 1;
+		}
+		return 0;
+	}
+
+
+	int pushPiece(Piece a){
+		/*Is the board clear at this point?*/
+		int w = a.getWidth();
+		int h = a.getHeight();
+		for(int x=0; x<w; x++){
+			for(int y=0; y<h; y++){
+				/*Nope...can't add this piece*/
+				if(gameBoard[x+coordx][y+coordy] != 0){
+					return 0;
+				}
+			}
+		}
+		placements.push_back(index);
+		pieces.push_back(a);
+		for(int x=0; x<w; x++){
+			for(int y=0; y<h; y++){
+				/*Checking off this section of the board*/
+				gameBoard[x+coordx][y+coordy] = 1;
+			}
+		}
+		/*We have to at least move over the index over by the width*/
+		displayIndex();
+		moveIndex(index+w);
+
+		/*Make sure to find the next empty spot w/o walking off the edge*/
+		while(gameBoard[coordx][coordy]!=0 && index<(width*height - 1)){
+			moveIndex(index+1);
+			displayIndex();
+		}
+		cout << "Now" << endl;
+		displayIndex();
+		return 1;
+	}
+	void popPiece(){
+		pieces.pop_back();
+	}
+	void swap(int index, int index2){
+		Piece temp = pieces[index];
+		pieces[index] = pieces[index2];
+		pieces[index2] = temp;
+	}
+	int manipulate(int index, int direction){
+		/*00 up 01 right 11 down 10 left*/
+		switch (direction){
+			case 0:
+
+				break;
+			case 1:
+
+				break;
+			case 2:
+
+				break;
+			case 3:
+
+				break;
+			default:
+
+				break;
+		}
 	}
 
 	State save(){
 		long code = 0;
-		for each(Piece boardPiece in Pieces){
+		for each(Piece boardPiece in pieces){
 			code += boardPiece.getCode();
 			code << boardPiece.getCodeLength();
 		}
 		State nState(0,code);
 		return nState;
 	}
-	void pushPiece(Piece a){
-		Pieces.push_back(a);
+
+	void display(){
+		for(int y=0;y<height;y++){
+			for(int x=0;x<width;x++){
+				cout << gameBoard[x][y];
+			}
+			cout << endl;
+		}
 	}
-	void popPiece(){
-		Pieces.pop_back();
-	}
-	void swap(int index, int index2){
-		Piece temp = Pieces[index];
-		Pieces[index] = Pieces[index2];
-		Pieces[index2] = temp;
+	void displayIndex(){
+		cout << "[" << coordx << "][" << coordy << "]" << endl;
 	}
 };
-
-vector<State> boardOverTime;
 
 int main(void)
 {
 	/* Empty */
 	Piece A(5,1,1);
 	/* Other */
-	Piece B(8,4,4);
+	Piece B(8,2,2);
 	Piece C(9,1,2);
 	Piece D(3,1,1);
 	Piece E(0,2,1);
-	Board testBoard;
+	Board testBoard(5,4);
+	/* Puzzle from PDF */
+	
+	cout << "Pushing E: " << testBoard.pushPiece(E) << endl;
+	testBoard.display();
+
+	cout << "Pushing E: " << testBoard.pushPiece(E) << endl;
+	testBoard.display();
+
+	cout << "Pushing D: " << testBoard.pushPiece(D) << endl;
+	testBoard.display();
+
+	cout << "Pushing B: " << testBoard.pushPiece(B) << endl;
+	testBoard.display();
+
+	cout << "Pushing C: " << testBoard.pushPiece(C) << endl;
+	testBoard.display();
+
+	cout << "Pushing D: " << testBoard.pushPiece(D) << endl;
+	testBoard.display();
+
+	cout << "Pushing A: " << testBoard.pushPiece(A) << endl;
+	testBoard.display();
+
+	cout << "Pushing D: " << testBoard.pushPiece(D) << endl;
+	testBoard.display();
+
+	cout << "Pushing A: " << testBoard.pushPiece(A) << endl;
+	testBoard.display();
+
+	cout << "Pushing E: " << testBoard.pushPiece(E) << endl;
+	testBoard.display();
+
+	cout << "Pushing E: " << testBoard.pushPiece(E) << endl;
+	testBoard.display();
+
+	cout << "Pushing D: " << testBoard.pushPiece(D) << endl;
+	testBoard.display();
+	system("pause");
 }

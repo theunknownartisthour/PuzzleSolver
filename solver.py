@@ -1,3 +1,6 @@
+
+import json
+
 DIRECTIONS = [(-1, 0),
               ( 0,-1),
               ( 0, 1),
@@ -27,15 +30,21 @@ class Solver(object):
         return self.solution
         
     
-    def get_steps(self):
+    def _get_steps(self):
         state = self.solution
         while state is not None:
             yield state
             state = state.parent
         
-    def print_steps(self):
-        steps = reversed(list(self.get_steps()))
-        print {i: e.to_list() for i, e in enumerate(steps)}
+    def get_steps(self):
+        steps = reversed(list(self._get_steps()))
+        return {i: e.to_list() for i, e in enumerate(steps)}
+
+    def write_to_json(self, path):
+        f = open(path, 'w')
+        obj = self.get_steps()
+        json.dump(obj, f)
+        f.close()
 
 
 class State(tuple):
@@ -143,21 +152,10 @@ def map_block_locations(board):
 if __name__ == '__main__':
     import tests
 
-    seven = State(tests.seven_steps)
-    nine = State(tests.nine_steps)
-    original = State(tests.original)
+    puzzle = State(tests.original)
 
-    print "Seven Steps\n"
-    solver = Solver(seven)
+    solver = Solver(puzzle)
     solver.solve()
-    solver.print_steps()
 
-    print "Nine Steps\n"
-    solver = Solver(nine)
-    solver.solve()
-    solver.print_steps()
-
-    print "116 Steps\n"
-    solver = Solver(original)
-    solver.solve()
-    solver.print_steps()
+    filename = 'solution.json'
+    solver.write_to_json(filename)

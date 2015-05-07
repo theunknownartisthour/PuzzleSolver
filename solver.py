@@ -1,4 +1,5 @@
 
+import sys
 import json
 
 DIRECTIONS = [(-1, 0),
@@ -54,6 +55,7 @@ class State(tuple):
     '''
     
     def __init__(self, *rows):
+        rows = [tuple(r) for r in rows]
         super(State, self).__init__(rows)
         self.rows = len(self)
         self.cols = len(self[0])
@@ -150,12 +152,14 @@ def map_block_locations(board):
 
 
 if __name__ == '__main__':
-    import tests
+    f = open('puzzle.json', 'r')
+    js = json.load(f)['puzzle']
 
-    puzzle = State(tests.original)
+    puzzle = State(js)
 
     solver = Solver(puzzle)
     solver.solve()
 
     filename = 'solution.json'
     solver.write_to_json(filename)
+    sys.exit(0)

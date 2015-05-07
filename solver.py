@@ -35,8 +35,7 @@ class Solver(object):
         
     def print_steps(self):
         steps = reversed(list(self.get_steps()))
-        for i, e in enumerate(steps):
-            print i, e.to_list()
+        print {i: e.to_list() for i, e in enumerate(steps)}
 
 
 class State(tuple):
